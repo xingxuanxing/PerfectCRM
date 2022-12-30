@@ -1,0 +1,34 @@
+{% extends 'index.html' %}
+
+{% block right-content %}
+    <h2 class="page-header">学员报名页</h2>
+
+    <form class="form-horizontal" method="post">{% csrf_token %}
+      <div class="form-group">
+        <label class="col-sm-2 control-label">客户</label>
+        <div class="col-sm-8">
+          <select name='customer' class="form-control" >
+              {% for customer in customers %}
+                  <option value="{{ customer.id }}">{{ customer }}</option>
+              {% endfor %}
+          </select>
+        </div>
+      </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label">报名班级</label>
+            <div class="col-sm-8">
+                <select name='classgrade' class="form-control" >
+                  {% for classgrade in classgrades  %}
+                      <option value="{{ classgrade.id }}">{{ classgrade }}</option>
+                  {% endfor %}
+              </select>
+
+            </div>
+          </div>
+        <input type="submit" class="btn btn-success pull-right" value="下一步">
+    </form>
+
+    {% if entrollment_link %}
+        <p>请把此链接发送给学员{{entrollment_link}}</p>
+    {% endif %}
+{% endblock %}

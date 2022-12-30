@@ -1,0 +1,20 @@
+{% extends 'index.html' %}
+
+{% block right-content %}
+    <h2 class="page-header">学员报名|合同审核</h2>
+
+    <form class="fm" method="post" onsubmit="DropAttrBeforeSumit(this)">{% csrf_token %}
+        {{ customer_form }}
+        {{ entrollment_form }}
+
+        <input type="submit" class="btn btn-success pull-right" value="审核通过">
+    </form>
+
+    <script>
+
+        function DropAttrBeforeSumit(ths){
+            $(".fm :disabled").removeAttr('disabled')
+        }
+    </script>
+{% endblock %}
+

@@ -1,0 +1,11 @@
+{% extends 'queenadmin/index.html' %}
+{% load queenadmin_tags %}
+
+{% block container-content-right %}
+
+    <h2 class="page-header">{% get_model_name admin_class %}</h2>
+    <h4 class="page-header">添加{% get_model_name admin_class %}数据</h4>
+
+    {% include 'queenadmin/table_obj_component.html' %}
+
+{% endblock %}

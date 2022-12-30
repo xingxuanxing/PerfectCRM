@@ -1,0 +1,137 @@
+{% extends 'queenadmin/index.html' %}
+{% load queenadmin_tags %}
+
+{% block container-content-right %}
+
+    <h2 class="page-header">app</h2>
+
+    <ol class="breadcrumb">
+      <li><a href="/queenadmin">queenadmin</a></li>
+      <li><a href="/queenadmin/{{ app_name }}">{{ app_name }}</a></li>
+      <li class="active">{{ model_name }}</li>
+    </ol>
+
+    <div>
+
+        <a href="add/">添加</a>
+
+        <div class="row">
+
+        {% if admin_class.list_filter %}
+            <form>
+                {% for filter_field in admin_class.list_filter %}
+                    {% build_filter_field filter_field admin_class%}
+                {% endfor %}
+                <input type="hidden" name="_o" value="{% get_sorted_index sorted_dict %}">
+                <div class="col-md-2">关键字查询:
+                    <input class="form-control" placeholder="{% for search in admin_class.search_fields %}{{ search }}; {% endfor %}"
+                           type="search" name="_q" value="{{ admin_class.search_keyword }}" >
+                </div>
+                <input class='btn btn-success'type="submit" value="过滤">
+            </form>
+        {% endif %}
+    </div>
+
+        <form onsubmit="return CheckAction(this)" method="post" >{% csrf_token %}
+            <div class="row">
+                <div class="col-lg-3">
+                   <select class="form-control" name="action">
+                            <option value="">-----------</option>
+                       {% for action in admin_class.actions %}
+                            <option value="{{ action }}">{{ action }}</option>
+                       {% endfor %}
+                   </select>
+                </div>
+
+                <div class="col-lg-2">
+                    <input type="submit" value="GO">
+                </div>
+            </div>
+        </form>
+
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" onclick="ChooseAll(this)"></th>
+                {% if admin_class.list_display %}
+                        {% for column in admin_class.list_display %}
+                            <th><a href="?_o={% get_sort_index forloop.counter0 sorted_dict column %}{% get_filter_args admin_class %}">
+                                {{ column }}{% generate_sorted_arrow column sorted_dict %}
+{#                                <span class="glyphicon glyphicon-triangle-top" aria-hidden="true"></span>#}
+                                </a>
+
+                            </th>
+
+                        {% endfor %}
+
+                {% else %}
+                    <th>{% get_model_name admin_class %}</th>
+                {% endif %}
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+                {% for obj in query_set %}
+                    <tr>
+                        <td><input chose-row='true' type="checkbox" value="{{ obj.id }}"></td>
+                        {% build_table_row obj admin_class %}
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+        </table>
+
+
+
+    <div class="pagination">
+    {% render_pagenation_btn query_set admin_class sorted_dict %}
+    </div>
+
+
+    </div>
+
+    <script>
+    function ChooseAll(ths){
+        if ($(ths).prop('checked')){
+            $('input[chose-row]').prop('checked',true);
+        }
+        else{
+            $('input[chose-row]').prop('checked',false);
+        }
+    }
+
+    function CheckAction(ths) {
+        var selectedAction = $('select[name=action]').val();
+        var selectedRows= $('input[chose-row]').filter(':checked');
+        console.log(selectedAction)
+        if (!selectedAction){
+            alert('no action seleced!')
+            return false
+        };
+
+        if(selectedRows.length == 0){
+            alert('no row seleced!')
+            return false
+        } else{
+            //生成一个input标签存入被选择对象的id，放入form表单，post提交后一起传到后端
+            var chosen_ids=[]
+            $.each(selectedRows,function (){
+                chosen_ids.push($(this).val())
+                console.log(chosen_ids)
+            })
+            var hidden_tag= '<input type="hidden" name="chosen_ids" value=' +JSON.stringify(chosen_ids)+ '>'
+            $(ths).append(hidden_tag)
+            {#console.log(hidden_tag)#}
+
+        }
+
+        {#return false#}
+    }
+
+    </script>
+
+{% endblock %}

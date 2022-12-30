@@ -1,0 +1,30 @@
+{% extends 'queenadmin/index.html' %}
+{% load queenadmin_tags %}
+
+{% block container-content-right %}
+
+    <h2 class="page-header">{% get_model_name admin_class %}</h2>
+    <h4 class="page-header alert-danger">删除{{ delete_obj }}相关的数据</h4>
+
+
+    {% if delete_obj %}
+        delete   {{ delete_obj }}
+        {% display_related_data delete_obj as related_data %}
+        {{ related_data | safe  }}
+
+    {% else %}
+        {% for delete_obj in delete_objs%}
+            <b style="color: red">delete {{ delete_obj }}</b>
+            {% display_related_data delete_obj as related_data %}
+            {{ related_data | safe  }}
+        {% endfor %}
+    {% endif %}
+
+    <form method="post">{% csrf_token %}
+        <input type="hidden" name="chosen_ids" value="{{ chosen_ids }}">
+        <input type='submit' class="btn btn-danger" value="确定删除">
+        <a class="btn btn-info">返回</a>
+    </form>
+
+
+{% endblock %}

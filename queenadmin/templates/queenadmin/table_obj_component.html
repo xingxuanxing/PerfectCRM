@@ -1,0 +1,111 @@
+{% load queenadmin_tags %}
+
+<form class="form-horizontal" method="post" onsubmit="VertifyBeforeSubmit()">{% csrf_token %}
+    {% for field in form_obj %}
+
+      <div class="form-group">
+        <label  class="col-sm-2 control-label">{{ field.label }}</label>
+        <div class="col-sm-10">
+
+                {% if field.name in admin_class.filter_horizontal %}
+                    <div class="col-lg-5">
+                    <input type="search" class="form-control" oninput="FuzzSearch(this)">
+                        <select multiple class="form-control" id='id_{{ field.name }}_from'>
+                        {% get_available_datas admin_class form_obj field.name as available_set %}
+                        {% for obj in available_set %}
+                            <option value="{{ obj.id }}" ondblclick="MoveSelectedOption(this,'id_{{ field.name }}_to')">{{ obj }}</option>
+                        {% endfor %}
+                        </select>
+                    <p><a onclick="MoveAllOption('id_{{ field.name }}_from','id_{{ field.name }}_to')">Choose ALL</a></p>
+                    </div>
+
+                    <div class="col-lg-5">
+                        <select multiple class="form-control" tag="selected_r" id='id_{{ field.name }}_to' name="{{ field.name }}">
+                        {% get_chosen_datas admin_class form_obj field.name  as chosen_queryset %}
+                        {% for obj in chosen_queryset %}
+                            <option value="{{ obj.id }}" ondblclick="MoveSelectedOption(this,'id_{{ field.name }}_from')">{{ obj }}</option>
+                        {% endfor %}
+                        </select>
+
+                        <p><a onclick="MoveAllOption('id_{{ field.name }}_to','id_{{ field.name }}_from')">Remove ALL</a></p>
+                    </div>
+
+                    {% else %}
+                        {{ field }}
+                    {% endif %}
+
+
+
+
+                <span style="color: red">{{ field.errors.0 }}</span>
+            </div>
+          </div>
+    {% endfor %}
+
+    {% if not admin_class.form_add %}
+    {% for field in admin_class.readonly_fields %}
+        <div class="form-group">
+            <label  class="col-sm-2 control-label">{{ field}}</label>
+            <div class="col-sm-10">
+                <p>{% get_field_value form_obj field %}</p>
+            </div>
+          </div>
+    {% endfor %}
+    {% endif %}
+
+
+    <div class="form-group">
+        {% if not admin_class.form_add %}
+            <div class="col-sm-offset-2">
+              <a class="btn btn-danger" href="{% url 'table_obj_delete' app_name model_name form_obj.instance.id %}">delete</a>
+            </div>
+        {% endif %}
+
+        <div class="col-sm-offset-10 col-sm-2">
+          <button type="submit" class="btn btn-info">Save</button>
+        </div>
+    </div>
+</form>
+
+<script>
+
+    function FuzzSearch(ths){
+        var input_text =$(ths).val().toUpperCase()
+        $(ths).next().children().each(function (){
+            //检查每个option内有没有上述的输入内容
+            if($(this).text().toUpperCase().search(input_text) != -1){
+                $(this).show();
+            }
+            else {
+                $(this).hide();
+            }
+        })
+    }
+
+    function MoveSelectedOption(ths,target_id){
+        var new_target_id=$(ths).parent().attr('id')
+
+
+        //字符串中间穿插变量的话，“+变量名+”  这个相当于字符串的一部分了
+        var new_option="<option value='"+$(ths).val()+"' ondblclick=MoveSelectedOption(this,'"+new_target_id+"')>" +$(ths).text()+"</option>";
+        {#console.log(new_option)#}
+        $("#"+target_id).append(new_option);
+        $(ths).remove();
+    }
+
+    function MoveAllOption(from_id,to_id) {
+        $("#" + from_id).children().each(function () {
+            MoveSelectedOption($(this), to_id);
+        })
+    }
+
+
+    function VertifyBeforeSubmit(){
+        $('select[tag] option').prop('selected',true)
+
+    }
+
+
+
+
+</script>
